@@ -1,18 +1,14 @@
 # Build the manager binary
-FROM golang:1.10.3 as builder
+FROM golang:1.14-buster as builder
 
 # Copy in the go src
 WORKDIR /go/src/github.com/ibm/cloud-operators
-COPY pkg/    pkg/
-COPY cmd/    cmd/
-COPY vendor/ vendor/
+COPY .  /go/src/github.com/ibm/cloud-operators
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/ibm/cloud-operators/cmd/manager
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags netgo -ldflags "-w" -a -o ibm-cloud-operator github.com/ibm/cloud-operators/cmd/manager
 
 # Copy the controller-manager into a thin image
-FROM registry.access.redhat.com/ubi8-minimal
-WORKDIR /root/
-COPY --from=builder /go/src/github.com/ibm/cloud-operators/manager .
-COPY git-rev .
-ENTRYPOINT ["./manager"]
+FROM us.icr.io/coligo-baseimage/ubi8-minimal:latest
+COPY --from=builder /go/src/github.com/ibm/cloud-operators/ibm-cloud-operator /ibm-cloud-operator
+ENTRYPOINT ["/ibm-cloud-operator"]

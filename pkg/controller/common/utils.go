@@ -35,7 +35,7 @@ type RestResult struct {
 // restCallFunc : common rest call fun
 func RestCallFunc(rsString string, postBody []byte, method string, header string, token string, expectReturn bool) (RestResult, error) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{},
 	}
 	restClient := http.Client{
 		Timeout:   time.Second * 300,

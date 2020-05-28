@@ -1,4 +1,4 @@
-module github.ibm.com/ibm/cloud-operators
+module github.com/ibm/cloud-operators
 
 go 1.14
 
@@ -14,7 +14,6 @@ require (
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/googleapis/gnostic v0.4.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/ibm/cloud-operators v0.0.0-20200518163849-512a1e1a0c79
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
 	github.com/onsi/ginkgo v1.12.0

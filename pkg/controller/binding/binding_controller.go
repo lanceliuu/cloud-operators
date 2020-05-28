@@ -134,6 +134,7 @@ type ReconcileBinding struct {
 // +kubebuilder:rbac:groups=,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=ibmcloud.ibm.com,resources=bindings/status,verbs=get;list;watch;create;update;patch;delete
 func (r *ReconcileBinding) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	logt.Info("starting reconcile", "request", request.NamespacedName)
 	rctx := rcontext.New(r.Client, request)
 	// Fetch the Binding instance
 	instance := &ibmcloudv1alpha1.Binding{}
@@ -206,7 +207,15 @@ func (r *ReconcileBinding) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	ibmCloudInfo, err := service.GetIBMCloudInfo(r.Client, serviceInstance)
 	if err != nil {
-		logt.Info("Unable to get", "ibmcloudInfo", instance.Name)
+		if errors.IsNotFound(err) && ContainsFinalizer(instance) &&
+			!instance.ObjectMeta.DeletionTimestamp.IsZero() {
+			logt.Info("Cannot get IBMCloud related secrets and configmaps, just remove finalizers", "in deletion", err.Error())
+			instance.ObjectMeta.Finalizers = DeleteFinalizer(instance)
+			if err := r.Update(context.Background(), instance); err != nil {
+				logt.Info("Error removing finalizers", "in deletion", err.Error())
+			}
+			return reconcile.Result{}, nil
+		}
 		return r.updateStatusError(instance, "Pending", err)
 	}
 
